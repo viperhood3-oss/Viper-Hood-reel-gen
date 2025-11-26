@@ -1,0 +1,1160 @@
+{
+  "name": "AI-Powered Instagram Reel Advertising Generator copy",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "576a75d1-909a-4e1b-82d3-3e5348350d00",
+              "name": "murfApiKey",
+              "value": "ap2_4d8e35fb-8d68-42b5-8029-9a1c1967a73b",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "bf504392-2088-4a2c-9fbb-9cffeb65c865",
+      "name": "Workflow Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1392,
+        1928
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "modelId": {
+          "__rl": true,
+          "value": "models/veo-2.0-generate-001",
+          "mode": "list",
+          "cachedResultName": "models/veo-2.0-generate-001"
+        },
+        "prompt": "={{ $json.scenes.visual_asset.prompt }}",
+        "options": {}
+      },
+      "id": "68ed2b72-32b6-4202-abf4-e5b53fcb8f5b",
+      "name": "Generate Video Clips",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        3312,
+        1784
+      ],
+      "credentials": {
+        "googlePalmApi": {
+          "id": "7GKeKHYJAd8fYEts",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-pro",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-pro"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are an expert Short-Form Video Production Planner and Scripting Engine. Your task is to analyze the user's content request and **GENERATE THE COMPLETE, FULLY POPULATED REEL SCRIPT DATA** segmented into dynamic, non-monolithic scenes.\n\n---\n\n### Strict Guidelines:\n1.  **Output Constraint:** The **ENTIRE** response MUST be a single, valid JSON object that adheres exactly to the schema provided below. **DO NOT include any markdown fences (```json, ```), introductory text, explanatory notes, or schema definitions.**\n2.  **Contextual Alignment:** Analyze the user's intent (e.g., advertising, educational, comedy) and tailor ALL fields (narration style, visual prompts, audio prompts) to match that context.\n3.  **Timing & Duration:** The total script duration MUST be between 15 and 60 seconds. For **EACH** scene, you **MUST** provide a precise `duration` (floating-point number in seconds).\n4.  **Scene Structure:** The script must contain multiple scenes that switch between asset sources (PEXELS, VGM) and asset types (IMAGE, VIDEO).\n5.  **Timestamps:** Set the `start_time` for the **FIRST** scene to `0.0`. Do not include `start_time` for any other scene.\n\"CRITICAL: You MUST generate content for a minimum of 3 scenes to successfully execute the automation workflow. Do not return an empty 'scenes' array.\"\nPrompt:{{ $json.chatInput }}\n\n---\n**BEGIN SCRIPT GENERATION**\n\n**YOU MUST ONLY OUTPUT THE DATA CONFORMING TO THIS STRUCTURE:**\n\n{\n  \"inferred_content_type\": \"The model's assessment of the user's goal (e.g., 'Educational Short', 'Direct-Response Ad').\",\n  \"title\": \"A short, catchy, context-appropriate title for the reel.\",\n  \"total_duration\": \"The estimated total length of the reel in seconds (sum of all scene durations).\",\n  \"scenes\": [\n    {\n      \"scene_number\": 1,\n      \"start_time\": \"0.0\", \n      \"duration\": \"5.5\", \n      \"narration\": {\n        \"text\": \"The exact script text for the TTS engine.\",\n        \"style\": \"Murf voice ID (e.g., en-US-natalie) that matches the required tone.\"\n      },\n      \"visual_asset\": {\n        \"source\": \"PEXELS/VGM\",\n        \"type\": \"IMAGE/VIDEO\",\n        \"prompt\": \"Highly descriptive prompt for Pexels or VGM.\"\n      },\n      \"audio_track\": {\n        \"bg_music_prompt\": \"Prompt to find suitable background music.\",\n        \"sound_fx_prompt\": \"Sound effects required at this time stamp.\"\n      }\n    }\n    // ... continue with as many scenes as needed\n  ]\n}",
+              "role": "model"
+            },
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1616,
+        1928
+      ],
+      "id": "abae390d-20ff-4698-a097-5e3f8b77bf89",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "hMkkhxXJWhZ94Yhl",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d3267946-e806-44a1-80fb-deada493d6ba",
+                    "leftValue": "={{ $json.scenes.visual_asset.source }}",
+                    "rightValue": "PEXELS",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "acb8d5d4-a6b8-4979-8712-5ef2e5c41b54",
+                    "leftValue": "={{ $json.scenes.visual_asset.source }}",
+                    "rightValue": "VGM",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        2640,
+        1712
+      ],
+      "id": "b867ec17-5103-430e-8062-bcf5d50a2210",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3536,
+        1712
+      ],
+      "id": "52e3d135-7268-48c3-a1e1-dca7dc5dee1b",
+      "name": "Merge1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the single input item\nconst inputItem = $input.all()[0]; \nconst rawText = inputItem.json.content.parts[0].text; // Accessing the text field\n\n// 2. Clean the markdown fences: ***This is the crucial step***\nlet cleanedJsonString = rawText.replace(/```json|```/g, '').trim();\n\n// 3. Parse and return\nconst parsedData = JSON.parse(cleanedJsonString);\nreturn [parsedData];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1968,
+        1928
+      ],
+      "id": "80e97624-9c22-4756-adf6-56f1069faa9a",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "scenes, scenes[0].visual_asset",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2416,
+        1928
+      ],
+      "id": "aa358bea-1c2d-42c7-ab03-141fdbc9ee4b",
+      "name": "Split Out",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// === n8n Code Node - Extract scenes for Split Out ===\n\nconst input = items[0].json;\n\n// Handle both array and single object\nlet video = Array.isArray(input) ? input[0] : input;\n\nif (!video || !video.scenes || !Array.isArray(video.scenes)) {\n  throw new Error(\"No valid 'scenes' array found in input\");\n}\n\n// Return 1 item with 'scenes' as array of objects\nreturn [\n  {\n    json: {\n      scenes: video.scenes.map((scene, index) => ({\n        ...scene,\n        _parent: {\n          title: video.title,\n          content_type: video.inferred_content_type,\n          total_duration: video.total_duration\n        },\n        _index: index + 1,\n        _total_scenes: video.scenes.length\n      }))\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2192,
+        1928
+      ],
+      "id": "27e89355-0f3e-4d25-84d5-8d5f3dfc821a",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// === FLATTEN SCENE FOR TTS ===\nreturn items.map(item => {\n  const scene = item.json.scenes;\n  if (!scene) return { json: {} };\n\n  return {\n    json: {\n      text: scene.narration.text,\n      style: scene.narration.style,\n      duration: scene.duration,\n      _index: scene._index,\n      _parent: scene._parent\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3536,
+        2096
+      ],
+      "id": "5469a3be-e81f-40d6-81fb-3e83fb0e2d92",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "amount": 4
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3984,
+        2048
+      ],
+      "id": "1fa9ea52-8fdf-43ad-9d6a-39cc71e98288",
+      "name": "Wait",
+      "webhookId": "7564478a-9e8d-4712-b66b-635c1e7db2df"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "id": "03a6e19c-c54d-4d51-9fcc-b2a9798353fc",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        3760,
+        2096
+      ],
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.murf.ai/v1/speech/generate",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api-key",
+              "value": "=ap2_4d8e35fb-8d68-42b5-8029-9a1c1967a73b"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"voice_id\": \"{{$json.murfVoiceId}}\",\n  \"text\": \"{{$json.text}}\",\n  \"style\": \"{{$json.style}}\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "54c5b732-df86-444b-bccc-dd335b0db9e3",
+      "name": "Murf Gen 2 TTS",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        4432,
+        2048
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// === GET MURF VOICE FROM narration.style ===\nreturn items.map(item => {\n  const voiceId = item.json.narration?.style || \"en-US-natalie\";\n\n  return {\n    json: {\n      ...item.json,\n      murfVoiceId: voiceId,\n      murfText: item.json.narration?.text\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4208,
+        2048
+      ],
+      "id": "d1410384-2207-4d31-aee7-772c8a791455",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        1168,
+        1928
+      ],
+      "id": "7c7b6b64-ec3c-4a91-adf5-1e0aa70f5613",
+      "name": "When chat message received",
+      "webhookId": "de3433bb-3120-4d61-bfdb-a6fbe8604ffe"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.shotstack.io/stage/render/{{ $json.response.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "wi2lRU9rjdbXzGWuZTh0bPJiQruRcNwv4PVOxG5m"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        5328,
+        1568
+      ],
+      "id": "9d1c827d-3f46-4cf6-ad9f-aab22e37231f",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "X5N1ek6xpPxtUuoP",
+          "name": "Header Auth account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 60
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        5104,
+        1640
+      ],
+      "id": "9f9ee95a-9ad9-4bf6-8f64-2b722078d90c",
+      "name": "Wait1",
+      "webhookId": "63bce4d2-7cd0-462d-bccc-094e32170753"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6af199b9-0801-4b8e-996d-77cc26443794",
+              "leftValue": "={{ $json.response.status }}",
+              "rightValue": "done",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        5552,
+        1640
+      ],
+      "id": "088b7b90-c1ba-4c1c-ba7e-c2da781ef0d0",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.response.url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "final_video.mp4"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        5776,
+        1640
+      ],
+      "id": "4e431aa0-081b-4628-a515-23fcae43d7c4",
+      "name": "HTTP Request2",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "9cV2OqUcG9m6dCEP",
+          "name": "Header Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "final_video.mp4",
+        "name": "final_video.mp4",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        6000,
+        1640
+      ],
+      "id": "90e56f0e-432e-49e3-9c66-deb5d1eb6c94",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "3XlIe5oRpFQlXqO8",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map((item) => {\n  // Use Cloudinary URLs instead of n8n binary URLs\n  const videoUrl = item.json.cloudinaryVideoUrl;\n  const audioUrl = item.json.cloudinaryAudioUrl;\n  const duration = item.json?.audioLengthInSeconds || item.json?.duration || 5;\n\n  return {\n    json: {\n      asset: {\n        type: \"video\",\n        src: videoUrl\n      },\n      start: 0,\n      length: duration,\n      transition: { in: \"fade\", out: \"fade\" },\n      audio: {\n        src: audioUrl,\n        volume: 1\n      }\n    }\n  };\n});\n```\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4432,
+        1640
+      ],
+      "id": "39e38a56-6d95-40dd-b0b5-52da68f4647b",
+      "name": "Code in JavaScript4"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3984,
+        1784
+      ],
+      "id": "53a4711f-0faf-4ec6-94d5-e3026011d72a",
+      "name": "Merge",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "={{$json[\"audioFile\"]}}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "audioData"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        4656,
+        2168
+      ],
+      "id": "06b29cc7-a5b8-41fc-8a19-58d1355ab46a",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all(); // this is an ARRAY of merged objects\n\n// Each item looks like:\n// { binary: { data: <video>, other: <video> }, json: { scenes: ... } }\n\nconst final = items.map(item => {\n  const scene = item.json;\n\n  // You must find which binary belongs to pexels and which belongs to generate\n  const pexels = item.binary?.data;     // rename if needed\n  const vgm    = item.binary?.other;    // rename if needed\n\n  return {\n    json: scene,\n    binary: {\n      video: pexels ?? vgm\n    }\n  };\n});\n\nreturn final;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3760,
+        1712
+      ],
+      "id": "95b7f16e-2fe9-4e10-93a2-55b4f5d5c1f4",
+      "name": "Code in JavaScript5"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const vid = item.json.videos?.[0];\n  if (!vid) {\n    return { json: { url: null } };\n  }\n\n  const files = vid.video_files || [];\n  const best = files.find(f => f.quality === \"hd\") || files[0];\n\n  return {\n    json: {\n      url: best?.link || null\n    }\n  };\n});\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3088,
+        1592
+      ],
+      "id": "28e7ced6-9fe6-4ccf-8e8a-db5dd0999192",
+      "name": "Code in JavaScript6"
+    },
+    {
+      "parameters": {
+        "url": "={{$json.url}}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        3312,
+        1592
+      ],
+      "id": "8c7a5825-8c8b-4602-9d51-47e47e0c1ea4",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.pexels.com/videos/search?query={{$json.scenes.visual_asset.prompt.split(' ').slice(0,6).join(' ')}}&per_page=1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "SyNwdCWFhB2Zw7CcRAb65HTaMgjVbXfpDO6eDEw6ay6mzyg6I96cszWR"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        2864,
+        1592
+      ],
+      "id": "d407a0f2-e439-496b-a6fe-086c4ad48490",
+      "name": "HTTP Request5"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.shotstack.io/edit/stage/render",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        4880,
+        1640
+      ],
+      "id": "f6d36655-762d-42b8-92ba-43b719de135b",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "X5N1ek6xpPxtUuoP",
+          "name": "Header Auth account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// Separate video clips and audio clips\nconst videoClips = [];\nconst audioClips = [];\n\nitems.forEach(item => {\n  const clip = item.json;\n  \n  // Add video clip (without audio property)\n  videoClips.push({\n    asset: {\n      type: \"video\",\n      src: clip.asset.src\n    },\n    start: clip.start,\n    length: clip.length,\n    transition: clip.transition\n  });\n  \n  // Add audio clip as separate track\n  if (clip.audio && clip.audio.src) {\n    audioClips.push({\n      asset: {\n        type: \"audio\",\n        src: clip.audio.src,\n        volume: clip.audio.volume || 1  // ← Move volume inside asset\n      },\n      start: clip.start,\n      length: clip.length\n    });\n  }\n});\n\nreturn [{\n  json: {\n    timeline: {\n      tracks: [\n        {\n          clips: videoClips  // Video track\n        },\n        {\n          clips: audioClips  // Audio track\n        }\n      ]\n    },\n    output: {\n      format: \"mp4\",\n      resolution: \"1080\",\n      fps: 30\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4656,
+        1640
+      ],
+      "id": "aba1c46c-a51b-4043-8e1d-d1baa941a22e",
+      "name": "Code in JavaScript7"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        4208,
+        1784
+      ],
+      "id": "329dae83-857f-4990-af65-7d863883162b",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cloudinary.com/v1_1/ddxv9z9vp/video/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "resource_type",
+              "value": "video"
+            },
+            {
+              "name": "folder",
+              "value": "n8n_videos"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "file",
+              "value": "= {{ $binary.video }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        4432,
+        1856
+      ],
+      "id": "31d6953a-fc81-470b-872b-9976cc453af2",
+      "name": "HTTP Request6",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "LCw8Gh0pyXHJWliP",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cloudinary.com/v1_1/ddxv9z9vp/raw/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "resource_type",
+              "value": "auto"
+            },
+            {
+              "name": "folder",
+              "value": "n8n_audio"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "file",
+              "value": "={{ $binary.audioData }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        4640,
+        1856
+      ],
+      "id": "84527491-0ed0-4a47-960c-6d5742e10430",
+      "name": "HTTP Request7",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "LCw8Gh0pyXHJWliP",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Store Cloudinary URLs from both uploads\nconst item = items[0];\n\n// Get video URL from HTTP Request6\nconst videoUrl = item.json.secure_url; // from Cloudinary video upload\n\n// Get audio URL from the audio upload (you'll need to merge or pass this through)\nconst audioUrl = item.json.secure_url; // from Cloudinary audio upload\n\nreturn [{\n  json: {\n    ...item.json,\n    cloudinaryVideoUrl: videoUrl,\n    cloudinaryAudioUrl: audioUrl,\n    duration: item.json.audioLengthInSeconds || 5\n  },\n  binary: item.binary\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4848,
+        1856
+      ],
+      "id": "60643a38-c9e2-42cd-8f8a-94f8817d91f1",
+      "name": "Code in JavaScript8"
+    }
+  ],
+  "pinData": {
+    "Generate Video Clips": [
+      {
+        "json": {
+          "mimeType": "video/mp4",
+          "fileType": "video",
+          "fileExtension": "mp4",
+          "fileName": "video.mp4",
+          "id": "filesystem-v2:workflows/9vL2tpWQzIoYHCGv/executions/389/binary_data/072e8dd2-8280-4e71-98d3-7fadd61bcd75",
+          "fileSize": "3.4 MB"
+        },
+        "binary": {
+          "data": {
+            "mimeType": "video/mp4",
+            "fileType": "video",
+            "fileExtension": "mp4",
+            "data": "filesystem-v2",
+            "fileName": "video.mp4",
+            "id": "filesystem-v2:workflows/9vL2tpWQzIoYHCGv/executions/389/binary_data/072e8dd2-8280-4e71-98d3-7fadd61bcd75",
+            "fileSize": "3.4 MB"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Workflow Configuration": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Video Clips": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Generate Video Clips",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Murf Gen 2 TTS": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Murf Gen 2 TTS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Workflow Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript5": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript6": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request5": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript7": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request6": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request7": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript8": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "29caf7cc-015e-419e-b5cb-3ba26ce1a211",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1bea20e3a8faa2fff33eccdc9a3f04228fdb35dc5e3344fbdae110ee9b3619fd"
+  },
+  "id": "9vL2tpWQzIoYHCGv",
+  "tags": []
+}
